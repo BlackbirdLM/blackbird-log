@@ -57,6 +57,5 @@ jobs:
         run: |
           git add docs/logs/auto-log.md
           git commit -m "${{ steps.commitmsg.outputs.msg }}"
-          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
+          git remote set-url origin "https://${GH_TOKEN}@github.com/BlackbirdLM/blackbird-log.git" # Corrected URL
           git push origin HEAD:main
-
