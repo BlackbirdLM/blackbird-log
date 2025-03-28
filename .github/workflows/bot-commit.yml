@@ -1,20 +1,10 @@
-name: Commit as blackbird-bot
+name: Commit as blackbird-bot (Quick Test)
 
 on:
   workflow_dispatch:
     inputs:
-      type:
-        description: 'Commit type (log, update, note)'
-        required: true
-        default: 'log'
-      scope:
-        description: 'Optional scope (e.g. mkdocs, infra)'
-        required: false
-      issue:
-        description: 'Optional issue number'
-        required: false
       message:
-        description: 'Log message'
+        description: 'Log message (quick test)'
         required: true
 
 jobs:
@@ -30,47 +20,15 @@ jobs:
           git config user.name "blackbird-bot"
           git config user.email "blackbird-bot@users.noreply.github.com"
 
-      - name: Compose commit message
-        id: commitmsg
+      - name: Append to log (existing file)
         run: |
-          TYPE="${{ github.event.inputs.type }}"
-          SCOPE="${{ github.event.inputs.scope }}"
-          ISSUE="${{ github.event.inputs.issue }}"
-          MSG="${{ github.event.inputs.message }}"
-
-          if [ -n "$SCOPE" ]; then
-            SCOPE="(${SCOPE})"
-          fi
-          if [ -n "$ISSUE" ]; then
-            ISSUE="#$ISSUE "
-          fi
-
-          echo "msg=${TYPE}${SCOPE}: ${ISSUE}${MSG}" >> $GITHUB_OUTPUT
-          echo "DEBUG: Commit message: ${{ steps.commitmsg.outputs.msg }}"
-
-      - name: Create docs/logs directory (if needed)
-        run: mkdir -p docs/logs
-
-      - name: Append to log
-        run: |
-          echo "- [$(date '+%Y-%m-%d %H:%M')] ${{ github.event.inputs.message }}" >> docs/logs/auto-log.md
-          echo "DEBUG: Appended log entry: ${{ github.event.inputs.message }}"
-
-      - name: Debug GH_TOKEN
-        run: |
-          echo "DEBUG: GH_TOKEN: ${GH_TOKEN}"
-
-      - name: Clean Git Directory
-        run: |
-          git clean -fdx
-          echo "DEBUG: Git directory cleaned"
+          echo "- [$(date '+%Y-%m-%d %H:%M')] ${{ github.event.inputs.message }}" >> docs/logs/2024-03-28-bot.md
 
       - name: Commit and push
         env:
           GH_TOKEN: ${{ secrets.BLACKBIRD_BOT_TOKEN }}
         run: |
-          git add docs/logs/auto-log.md
-          git commit -m "${{ steps.commitmsg.outputs.msg }}"
+          git add docs/logs/2024-03-28-bot.md
+          git commit -m "Quick test: ${{ github.event.inputs.message }}"
           git remote set-url origin "https://${GH_TOKEN}@github.com/BlackbirdLM/blackbird-log.git"
           git push origin HEAD:main
-          echo "DEBUG: Git push completed"
