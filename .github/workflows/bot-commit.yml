@@ -46,21 +46,24 @@ jobs:
           fi
 
           echo "msg=${TYPE}${SCOPE}: ${ISSUE}${MSG}" >> $GITHUB_OUTPUT
-          echo "DEBUG: Commit message: ${{ steps.commitmsg.outputs.msg }}"  # Corrected syntax
+          echo "DEBUG: Commit message: ${{ steps.commitmsg.outputs.msg }}"
+
+      - name: Create docs/logs directory (if needed)
+        run: mkdir -p docs/logs
 
       - name: Append to log
         run: |
           echo "- [$(date '+%Y-%m-%d %H:%M')] ${{ github.event.inputs.message }}" >> docs/logs/auto-log.md
-          echo "DEBUG: Appended log entry: ${{ github.event.inputs.message }}" # Corrected syntax
+          echo "DEBUG: Appended log entry: ${{ github.event.inputs.message }}"
 
       - name: Debug GH_TOKEN
         run: |
-          echo "DEBUG: GH_TOKEN: ${GH_TOKEN}" # Corrected syntax
+          echo "DEBUG: GH_TOKEN: ${GH_TOKEN}"
 
       - name: Clean Git Directory
         run: |
           git clean -fdx
-          echo "DEBUG: Git directory cleaned" # Corrected syntax
+          echo "DEBUG: Git directory cleaned"
 
       - name: Commit and push
         env:
@@ -70,4 +73,4 @@ jobs:
           git commit -m "${{ steps.commitmsg.outputs.msg }}"
           git remote set-url origin "https://${GH_TOKEN}@github.com/BlackbirdLM/blackbird-log.git"
           git push origin HEAD:main
-          echo "DEBUG: Git push completed" # Corrected syntax
+          echo "DEBUG: Git push completed"
