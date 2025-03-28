@@ -46,10 +46,20 @@ jobs:
           fi
 
           echo "msg=${TYPE}${SCOPE}: ${ISSUE}${MSG}" >> $GITHUB_OUTPUT
+          echo "DEBUG: Commit message: ${{ steps.commitmsg.outputs.msg }}" # Debug message
 
       - name: Append to log
         run: |
           echo "- [$(date '+%Y-%m-%d %H:%M')] ${{ github.event.inputs.message }}" >> docs/logs/auto-log.md
+          echo "DEBUG: Appended log entry: ${{ github.event.inputs.message }}" # Debug message
+
+      - name: Debug GH_TOKEN
+        run: echo "DEBUG: GH_TOKEN: ${GH_TOKEN}" # Debug message
+
+      - name: Clean Git Directory
+        run: |
+          git clean -fdx
+          echo "DEBUG: Git directory cleaned" #debug message
 
       - name: Commit and push
         env:
@@ -57,5 +67,6 @@ jobs:
         run: |
           git add docs/logs/auto-log.md
           git commit -m "${{ steps.commitmsg.outputs.msg }}"
-          git remote set-url origin "https://${GH_TOKEN}@github.com/BlackbirdLM/blackbird-log.git" # Corrected URL
+          git remote set-url origin "https://${GH_TOKEN}@github.com/BlackbirdLM/blackbird-log.git"
           git push origin HEAD:main
+          echo "DEBUG: Git push completed" #debug message
