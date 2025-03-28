@@ -1,0 +1,62 @@
+name: Commit as blackbird-bot
+
+on:
+  workflow_dispatch:
+    inputs:
+      type:
+        description: 'Commit type (log, update, note)'
+        required: true
+        default: 'log'
+      scope:
+        description: 'Optional scope (e.g. mkdocs, infra)'
+        required: false
+      issue:
+        description: 'Optional issue number'
+        required: false
+      message:
+        description: 'Log message'
+        required: true
+
+jobs:
+  commit-as-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "blackbird-bot"
+          git config user.email "blackbird-bot@users.noreply.github.com"
+
+      - name: Compose commit message
+        id: commitmsg
+        run: |
+          TYPE="${{ github.event.inputs.type }}"
+          SCOPE="${{ github.event.inputs.scope }}"
+          ISSUE="${{ github.event.inputs.issue }}"
+          MSG="${{ github.event.inputs.message }}"
+
+          if [ -n "$SCOPE" ]; then
+            SCOPE="(${SCOPE})"
+          fi
+          if [ -n "$ISSUE" ]; then
+            ISSUE="#$ISSUE "
+          fi
+
+          echo "msg=${TYPE}${SCOPE}: ${ISSUE}${MSG}" >> $GITHUB_OUTPUT
+
+      - name: Append to log
+        run: |
+          echo "- [$(date '+%Y-%m-%d %H:%M')] ${{ github.event.inputs.message }}" >> docs/logs/auto-log.md
+
+      - name: Commit and push
+        env:
+          GH_TOKEN: ${{ secrets.BLACKBIRD_BOT_TOKEN }}
+        run: |
+          git add docs/logs/auto-log.md
+          git commit -m "${{ steps.commitmsg.outputs.msg }}"
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
+          git push origin HEAD:main
+

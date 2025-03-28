@@ -1,0 +1,12 @@
+site_name: Blackbird Log
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - Logs:
+      - Bot Commit Success: logs/2024-03-28-bot.md
+  - Bots: bots/index.md
+  - Agents: agents/index.md
+  - Demos: demos/index.md
+
