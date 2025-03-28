@@ -1,10 +1,10 @@
-name: Commit as blackbird-bot (Quick Test)
+name: Commit as blackbird-bot (Force Token + Debug)
 
 on:
   workflow_dispatch:
     inputs:
       message:
-        description: 'Log message (quick test)'
+        description: 'Log message (force token test)'
         required: true
 
 jobs:
@@ -24,11 +24,29 @@ jobs:
         run: |
           echo "- [$(date '+%Y-%m-%d %H:%M')] ${{ github.event.inputs.message }}" >> docs/logs/2024-03-28-bot.md
 
-      - name: Commit and push
+      - name: Debug GH_TOKEN presence
+        run: |
+          if [ -n "$GH_TOKEN" ]; then
+            echo "DEBUG: GH_TOKEN is present."
+          else
+            echo "DEBUG: GH_TOKEN is NOT present."
+            exit 1 # Fail the step if token is not present
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.BLACKBIRD_BOT_TOKEN }}
+
+      - name: Check git remote URL
+        run: |
+          git remote -v
+          echo "DEBUG: git remote URL set to: https://${GH_TOKEN}@github.com/BlackbirdLM/blackbird-log.git"
+        env:
+          GH_TOKEN: ${{ secrets.BLACKBIRD_BOT_TOKEN }}
+
+      - name: Commit and push (Force Token)
         env:
           GH_TOKEN: ${{ secrets.BLACKBIRD_BOT_TOKEN }}
         run: |
           git add docs/logs/2024-03-28-bot.md
-          git commit -m "Quick test: ${{ github.event.inputs.message }}"
+          git commit -m "Force token test: ${{ github.event.inputs.message }}"
           git remote set-url origin "https://${GH_TOKEN}@github.com/BlackbirdLM/blackbird-log.git"
-          git push origin HEAD:main
+          git push "https://${GH_TOKEN}@github.com/BlackbirdLM/blackbird-log.git" HEAD:main
